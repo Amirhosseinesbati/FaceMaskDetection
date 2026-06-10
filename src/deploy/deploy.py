@@ -1,19 +1,24 @@
 import subprocess
 import json
+import os
 import sys
-import dotenv
+from dotenv import load_dotenv
+
 
 # ==========================================
 # 🛑 متغیرهای خود را اینجا وارد کنید 🛑
 # ==========================================
-dotenv.load_dotenv()
-VAST_API_KEY = dotenv.get("VAST_API_KEY")
-DAGSHUB_TOKEN = dotenv.get("DAGSHUB_USER_TOKEN")
-DAGSHUB_USERNAME = dotenv.get("DAGSHUB_REPO_OWNER")
-DAGSHUB_TRACKING_URI = dotenv.get("DAGSHUB_TRACKING_URI")
-GIT_REPO_URL = dotenv.get("GIT_REPO_URL")
-GPU_TARGET = dotenv.get("GPU_TARGET")
-GIT_BRANCH = dotenv.get("GIT_BRANCH") # اگر GIT_BRANCH تعریف نشده بود، از main استفاده کن 
+load_dotenv()
+VAST_API_KEY = os.getenv("VAST_API_KEY")
+DAGSHUB_TOKEN = os.getenv("DAGSHUB_USER_TOKEN")
+DAGSHUB_USERNAME = os.getenv("DAGSHUB_REPO_OWNER")
+DAGSHUB_TRACKING_URI = os.getenv("DAGSHUB_TRACKING_URI")
+GIT_REPO_URL = os.getenv("GIT_REPO_URL")
+GPU_TARGET = os.getenv("GPU_TARGET")
+GIT_BRANCH = os.getenv("GIT_BRANCH") 
+# متغیرهای جدید برای دانلود دیتاست:
+KAGGLE_USERNAME = os.getenv("KAGGLE_USERNAME")
+KAGGLE_KEY = os.getenv("KAGGLE_KEY")
 # ==========================================
 
 def run_command(command, return_output=False):
@@ -58,6 +63,8 @@ if __name__ == "__main__":
         f"-e DAGSHUB_TRACKING_URI={DAGSHUB_TRACKING_URI} "
         f"-e GIT_REPO_URL={GIT_REPO_URL}"
         f"-e GIT_BRANCH={GIT_BRANCH}"
+        f"-e KAGGLE_USERNAME={KAGGLE_USERNAME} "
+        f"-e KAGGLE_KEY={KAGGLE_KEY}"
     )
 
     create_cmd = (

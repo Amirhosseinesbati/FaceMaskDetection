@@ -10,8 +10,8 @@ def setup_kaggle_credentials():
     # مقادیر زیر را با اطلاعات داخل فایل kaggle.json خود جایگزین کنید
     # یا قبل از اجرای برنامه، این متغیرها را در ترمینال ست کنید
     
-    os.environ['KAGGLE_USERNAME'] = "YOUR_KAGGLE_USERNAME"
-    os.environ['KAGGLE_KEY'] = "YOUR_KAGGLE_API_TOKEN"
+    os.environ['KAGGLE_USERNAME'] = "KAGGLE_USERNAME"
+    os.environ['KAGGLE_KEY'] = "KAGGLE_KEY"
     
     # بررسی می‌کنیم که آیا توکن‌ها تنظیم شده‌اند یا خیر
     if 'KAGGLE_USERNAME' not in os.environ or 'KAGGLE_KEY' not in os.environ:
