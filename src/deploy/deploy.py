@@ -13,6 +13,7 @@ DAGSHUB_USERNAME = dotenv.get("DAGSHUB_REPO_OWNER")
 DAGSHUB_TRACKING_URI = dotenv.get("DAGSHUB_TRACKING_URI")
 GIT_REPO_URL = dotenv.get("GIT_REPO_URL")
 GPU_TARGET = dotenv.get("GPU_TARGET")
+GIT_BRANCH = dotenv.get("GIT_BRANCH") # اگر GIT_BRANCH تعریف نشده بود، از main استفاده کن 
 # ==========================================
 
 def run_command(command, return_output=False):
@@ -56,6 +57,7 @@ if __name__ == "__main__":
         f"-e DAGSHUB_USERNAME={DAGSHUB_USERNAME} "
         f"-e DAGSHUB_TRACKING_URI={DAGSHUB_TRACKING_URI} "
         f"-e GIT_REPO_URL={GIT_REPO_URL}"
+        f"-e GIT_BRANCH={GIT_BRANCH}"
     )
 
     create_cmd = (
