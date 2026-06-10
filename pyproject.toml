@@ -6,9 +6,19 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "dagshub>=0.7.0",
+    "dataset>=2.0.0",
     "kagglehub>=1.0.1",
     "mlflow>=3.13.0",
     "opencv-python>=4.13.0.92",
+    "passlib>=1.7.4",
+    "pip>=26.1.2",
     "python-dotenv>=1.2.2",
     "pyyaml>=6.0.3",
+    "torchvision>=0.27.0",
+    "zenml[server]==0.94.6",
+]
+
+[dependency-groups]
+dev = [
+    "pip>=26.1.2",
 ]
