@@ -67,5 +67,8 @@ jobs:
         uv run zenml stack set ci_stack
 
     - name: 🚀 Run Integration / Smoke Test
+      env:
+        MLFLOW_ALLOW_FILE_STORE: "true"
+        
       run: |
         uv run python src/pipeline/pipeline.py
