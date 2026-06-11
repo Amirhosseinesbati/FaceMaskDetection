@@ -1,6 +1,5 @@
 name: ML Pipeline CI
 
-# مشخص کردن زمان اجرای CI (Trigger Events)
 on:
   push:
     branches: 
@@ -14,41 +13,40 @@ jobs:
   lint-test-and-smoke:
     runs-on: ubuntu-latest
     
-    # متغیرهای محیطی که به پایتون پاس داده می‌شوند
     env:
       CI: true
+      PYTHONPATH: .
       KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
       KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
-      PYTHONPATH: . 
 
     steps:
     - name: 📥 Checkout repository
       uses: actions/checkout@v4
 
-    # استفاده از پایتون 3.12 طبق درخواست شما
-    - name: 🐍 Set up Python 3.12
-      uses: actions/setup-python@v5
+    # 🌟 جادوی جدید: استفاده از uv به جای pip و setup-python سنتی
+    - name: ⚡ Install uv and Set up Python 3.12
+      uses: astral-sh/setup-uv@v5
       with:
         python-version: "3.12"
-        cache: 'pip' # کش کردن پکیج‌ها برای سرعت بیشتر در اجراهای بعدی
+        enable-cache: true # کش کردن اتوماتیک پکیج‌ها توسط uv (فوق‌العاده سریع)
 
-    - name: 📦 Install dependencies
+    - name: 📦 Install dependencies with uv
       run: |
-        python -m pip install --upgrade pip
-        pip install ruff pytest
+        # اگر فایل pyproject.toml یا uv.lock داری، فقط کافیه خط زیر رو از کامنت در بیاری:
+        uv sync
         
-        # نصب PyTorch نسخه CPU برای کاهش شدید زمان نصب و مصرف ترافیک CI
-        pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-        
-        # نصب سایر وابستگی‌های پروژه
-        pip install zenml mlflow dagshub kagglehub opencv-python-headless
+        # # در غیر این صورت، نصب با uv pip (بسیار سریع‌تر از pip معمولی):
+        # uv pip install system ruff pytest
+        # uv pip install system torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        # uv pip install system zenml mlflow dagshub kagglehub opencv-python-headless sqlalchemy-utils
 
     # - name: 🧹 Code Quality (Linting & Formatting)
+    #   # uv خودش می‌تونه ruff رو مستقیم اجرا کنه، ولی چون نصبش کردیم همون دستور قبلی کار میده
     #   run: |
     #     ruff check .
     #     ruff format --check .
 
-    - name: 🧪 Run Unit Tests (Architecture & Logic Validation)
+    - name: 🧪 Run Unit Tests (Architecture Validation)
       run: |
         pytest tests/ -v -W ignore::DeprecationWarning
 
@@ -58,5 +56,4 @@ jobs:
 
     - name: 🚀 Run Integration / Smoke Test
       run: |
-        # اجرای پایپ‌لاین کامل در حالت سبک (متغیر CI=true در کد پایتون این را مدیریت می‌کند)
         python src/pipeline/pipeline.py
