@@ -19,6 +19,7 @@ jobs:
       CI: true
       KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
       KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+      PYTHONPATH: . 
 
     steps:
     - name: 📥 Checkout repository
