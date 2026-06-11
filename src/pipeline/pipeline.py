@@ -78,7 +78,8 @@ if __name__ == "__main__":
             "weight_decay": 0.0005,
             "num_epochs": 1, # فقط یک دور برای تست
             "optimizer": "SGD",
-            "model_architecture": "Faster R-CNN"
+            "model_architecture": "Faster R-CNN" ,
+            "fast_dev_run": True
         }
     else:
         HYPERPARAMS = {
@@ -88,7 +89,8 @@ if __name__ == "__main__":
             "weight_decay": 0.0005,
             "num_epochs": 15,
             "optimizer": "SGD",
-            "model_architecture": "Faster R-CNN"
+            "model_architecture": "Faster R-CNN",
+            "fast_dev_run": False
         }
 
     print("🔥 Handing over execution to ZenML Orchestrator...")

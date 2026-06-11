@@ -13,11 +13,8 @@ from src.training.model import get_model_instance_segmentation
 from src.utils.utils import collate_fn
 
 def run_training(data_dir: str, hyperparams: dict):
-    """
-    این تابع دقیقاً همان منطق آموزش شماست که از ماژول‌های دیگر استفاده می‌کند.
-    """
     device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-    print(f"[*] Training on device: {device}")
+    print(f"[*] Training on device: {device}", flush=True)
 
     # 1. فراخوانی ماژول دیتاست
     dataset = FaceMaskDataset(data_dir)
@@ -42,15 +39,15 @@ def run_training(data_dir: str, hyperparams: dict):
                           weight_decay=hyperparams["weight_decay"])
     
     use_cuda = device.type == 'cuda'
-    # 🌟 تغییر اول: اسکِیلر را با توجه به نسخه جدید و فقط برای GPU می‌سازیم
     scaler = torch.amp.GradScaler('cuda', enabled=use_cuda)
 
-    print("[*] Starting training loop with MLflow tracking...")
+    print("[*] Starting training loop with MLflow tracking...", flush=True)
     
-    # لاگ کردن پارامترها در MLflow
     mlflow.log_params(hyperparams)
     
-    # حلقه آموزش (همان کدهای قبلی شما)
+    # 🌟 اضافه کردن فلگ تست سریع
+    is_fast_run = hyperparams.get("fast_dev_run", False)
+    
     for epoch in range(hyperparams["num_epochs"]):
         model.train()
         epoch_loss = 0
@@ -61,7 +58,6 @@ def run_training(data_dir: str, hyperparams: dict):
 
             optimizer.zero_grad()
 
-            # 🌟 تغییر دوم: استفاده از سینتکس جدید PyTorch 2.x
             with torch.autocast(device_type=device.type, enabled=use_cuda):
                 loss_dict = model(images, targets)
                 losses = sum(loss for loss in loss_dict.values())
@@ -75,18 +71,29 @@ def run_training(data_dir: str, hyperparams: dict):
             if i % 10 == 0:
                 step = (epoch * len(train_data_loader)) + i
                 mlflow.log_metric("batch_loss", losses.item(), step=step)
+                
+            # چاپ وضعیت هر بچ (برای اینکه در لاگ گیت‌هاب ببینیم سیستم هنگ نکرده)
+            print(f"   [+] Processed batch {i+1}/{len(train_data_loader)}", flush=True)
 
-        avg_loss = epoch_loss / len(train_data_loader)
+            # 🌟 جادوی Smoke Test: خروج از حلقه بعد از 2 بچ
+            if is_fast_run and i >= 1:
+                print("⚠️ [Smoke Test] Processed 2 batches. Stopping batch loop early!", flush=True)
+                break
+
+        # محاسبه میانگین لاس (برای لاگ) - در حالت CI عدد دقیقی نیست ولی مهم نیست
+        avg_loss = epoch_loss / (i + 1)
         mlflow.log_metric("epoch_avg_loss", avg_loss, step=epoch)
-        # 🌟 با اضافه کردن flush=True مطمئن می‌شویم پرینت بلافاصله روی صفحه می‌آید
         print(f"[+] Epoch {epoch+1} done | Average Loss: {avg_loss:.4f}", flush=True)
 
-    print("[*] Training Finished! 🎉")
+        # 🌟 اطمینان از اینکه در حالت CI وارد اپوک‌های بعدی نمی‌شود
+        if is_fast_run:
+            print("⚠️ [Smoke Test] Stopping epoch loop early!", flush=True)
+            break
 
-    # ذخیره در MLflow (بدون تگ Production، برای بررسی دستی در UI)
+    print("[*] Training Finished! 🎉", flush=True)
+
     mlflow.pytorch.log_model(pytorch_model=model, artifact_path="model")
     
-    # ذخیره فایل فیزیکی
     save_path = os.path.join("models", "latest_model.pth")
     os.makedirs("models", exist_ok=True)
     torch.save(model.state_dict(), save_path)
