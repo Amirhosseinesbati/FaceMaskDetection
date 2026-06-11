@@ -50,9 +50,18 @@ jobs:
       run: |
         uv run pytest tests/ -v -W ignore::DeprecationWarning
 
-    - name: ⚙️ Initialize ZenML Orchestrator
+    - name: ⚙️ Initialize ZenML Orchestrator & Mock Stack
       run: |
         uv run zenml init
+        
+        # ۱. نصب ادغام (Integration) مربوط به MLflow در ZenML
+        uv run zenml integration install mlflow -y
+        
+        # ۲. ساخت یک ترکر محلی اما با اسمی که کد شما انتظار دارد!
+        uv run zenml experiment-tracker register dagshub_mlflow_tracker --flavor=mlflow
+        
+        # ۳. اضافه کردن این ترکر به Stack پیش‌فرض گیت‌هاب
+        uv run zenml stack update default -e dagshub_mlflow_tracker
 
     - name: 🚀 Run Integration / Smoke Test
       run: |
