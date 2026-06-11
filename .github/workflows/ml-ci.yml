@@ -48,12 +48,12 @@ jobs:
 
     - name: 🧪 Run Unit Tests (Architecture Validation)
       run: |
-        pytest tests/ -v -W ignore::DeprecationWarning
+        uv run pytest tests/ -v -W ignore::DeprecationWarning
 
     - name: ⚙️ Initialize ZenML Orchestrator
       run: |
-        zenml init
+        uv run zenml init
 
     - name: 🚀 Run Integration / Smoke Test
       run: |
-        python src/pipeline/pipeline.py
+        uv run python src/pipeline/pipeline.py
