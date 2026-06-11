@@ -36,25 +36,40 @@ def load_environment():
 # 🚀 بخش ۲: توابع کمکی (اجرای دستورات)
 # ==========================================
 def run_command(command, return_output=False, silent_error=False):
-    """اجرای دستورات ترمینال به صورت امن با پشتیبانی از UTF-8"""
+    """Execute shell commands safely, capturing raw bytes and decoding as UTF-8.
+    Decoding uses 'replace' for invalid sequences to avoid 'charmap' codec errors.
+    Also injects UTF-8 environment variables for subprocesses.
+    """
     try:
+        env = os.environ.copy()
+        env['PYTHONUTF8'] = '1'
+        env['PYTHONIOENCODING'] = 'utf-8'
+        env.setdefault('LC_ALL', 'C.UTF-8')
+        env.setdefault('LANG', 'C.UTF-8')
+
         result = subprocess.run(
-            command, 
-            shell=True, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT, 
-            text=True, 
-            encoding="utf-8"
+            command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=env
         )
-        
-        output = result.stdout.strip() if result.stdout else ""
-        
+
+        output_bytes = result.stdout or b''
+        # Try UTF-8 decode, fall back to replacement to avoid decode errors
+        try:
+            output = output_bytes.decode('utf-8')
+        except Exception:
+            output = output_bytes.decode('utf-8', errors='replace')
+
+        output = output.strip()
+
         if result.returncode != 0:
             if not silent_error:
                 print(f"\n🛑 COMMAND FAILED: {command}")
                 print(f"--- Error Details ---\n{output}\n---------------------")
             sys.exit(1)
-            
+
         return output if return_output else None
     except Exception as e:
         print(f"\n❌ Subprocess execution failed: {e}")

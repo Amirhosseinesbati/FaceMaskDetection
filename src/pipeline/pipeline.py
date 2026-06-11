@@ -66,15 +66,30 @@ if __name__ == "__main__":
     
     DATASET_HANDLE = "andrewmvd/face-mask-detection"
     
-    HYPERPARAMS = {
-        "batch_size": 16, # روی سرور ابری می‌توانید بالاتر ببرید
-        "learning_rate": 0.005,
-        "momentum": 0.9,
-        "weight_decay": 0.0005,
-        "num_epochs": 15,
-        "optimizer": "SGD",
-        "model_architecture": "Faster R-CNN"
-    }
+    # 🌟 تغییر مهم: تشخیص محیط CI
+    is_ci_env = os.environ.get("CI", "false").lower() == "true"
+    
+    if is_ci_env:
+        print("⚠️ CI Environment Detected! Running a FAST Smoke Test...")
+        HYPERPARAMS = {
+            "batch_size": 2, # رم سرور گیت‌هاب کم است
+            "learning_rate": 0.005,
+            "momentum": 0.9,
+            "weight_decay": 0.0005,
+            "num_epochs": 1, # فقط یک دور برای تست
+            "optimizer": "SGD",
+            "model_architecture": "Faster R-CNN"
+        }
+    else:
+        HYPERPARAMS = {
+            "batch_size": 16, 
+            "learning_rate": 0.005,
+            "momentum": 0.9,
+            "weight_decay": 0.0005,
+            "num_epochs": 15,
+            "optimizer": "SGD",
+            "model_architecture": "Faster R-CNN"
+        }
 
     print("🔥 Handing over execution to ZenML Orchestrator...")
     mask_detection_training_pipeline(dataset_handle=DATASET_HANDLE, hyperparams=HYPERPARAMS)
