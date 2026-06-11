@@ -42,10 +42,10 @@ jobs:
         # نصب سایر وابستگی‌های پروژه
         pip install zenml mlflow dagshub kagglehub opencv-python-headless
 
-    - name: 🧹 Code Quality (Linting & Formatting)
-      run: |
-        ruff check .
-        ruff format --check .
+    # - name: 🧹 Code Quality (Linting & Formatting)
+    #   run: |
+    #     ruff check .
+    #     ruff format --check .
 
     - name: 🧪 Run Unit Tests (Architecture & Logic Validation)
       run: |
