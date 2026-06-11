@@ -1,0 +1,74 @@
+name: ML Pipeline CI
+
+on:
+  push:
+    branches: 
+      - "main"
+      - "develop"
+  pull_request:
+    branches: 
+      - "develop"
+
+jobs:
+  lint-test-and-smoke:
+    runs-on: ubuntu-latest
+    
+    env:
+      CI: true
+      PYTHONPATH: .
+      KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+      KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+
+    # 🌟 جادوی جدید: استفاده از uv به جای pip و setup-python سنتی
+    - name: ⚡ Install uv and Set up Python 3.12
+      uses: astral-sh/setup-uv@v5
+      with:
+        python-version: "3.12"
+        enable-cache: true # کش کردن اتوماتیک پکیج‌ها توسط uv (فوق‌العاده سریع)
+
+    - name: 📦 Install dependencies with uv
+      run: |
+        # اگر فایل pyproject.toml یا uv.lock داری، فقط کافیه خط زیر رو از کامنت در بیاری:
+        uv sync
+        
+        # # در غیر این صورت، نصب با uv pip (بسیار سریع‌تر از pip معمولی):
+        # uv pip install system ruff pytest
+        # uv pip install system torch torchvision --index-url https://download.pytorch.org/whl/cpu
+        # uv pip install system zenml mlflow dagshub kagglehub opencv-python-headless sqlalchemy-utils
+
+    # - name: 🧹 Code Quality (Linting & Formatting)
+    #   # uv خودش می‌تونه ruff رو مستقیم اجرا کنه، ولی چون نصبش کردیم همون دستور قبلی کار میده
+    #   run: |
+    #     ruff check .
+    #     ruff format --check .
+
+    - name: 🧪 Run Unit Tests (Architecture Validation)
+      run: |
+        uv run pytest tests/ -v -W ignore::DeprecationWarning
+
+    - name: ⚙️ Initialize ZenML Orchestrator & Mock Stack
+      run: |
+        uv run zenml init
+        
+        # ۱. نصب ادغام MLflow
+        uv run zenml integration install mlflow -y
+        
+        # ۲. ساخت ترکر با اسم مورد انتظار کد شما
+        uv run zenml experiment-tracker register dagshub_mlflow_tracker --flavor=mlflow
+        
+        # ۳. 🌟 ساخت یک Stack جدید متشکل از ابزارهای دیفالت + ترکر ما
+        uv run zenml stack register ci_stack -a default -o default -e dagshub_mlflow_tracker
+        
+        # ۴. 🌟 فعال کردن Stack جدید تا کدها روی این اجرا شوند
+        uv run zenml stack set ci_stack
+
+    - name: 🚀 Run Integration / Smoke Test
+      env:
+        MLFLOW_ALLOW_FILE_STORE: "true"
+        
+      run: |
+        uv run python src/pipeline/pipeline.py
