@@ -54,14 +54,17 @@ jobs:
       run: |
         uv run zenml init
         
-        # ۱. نصب ادغام (Integration) مربوط به MLflow در ZenML
+        # ۱. نصب ادغام MLflow
         uv run zenml integration install mlflow -y
         
-        # ۲. ساخت یک ترکر محلی اما با اسمی که کد شما انتظار دارد!
+        # ۲. ساخت ترکر با اسم مورد انتظار کد شما
         uv run zenml experiment-tracker register dagshub_mlflow_tracker --flavor=mlflow
         
-        # ۳. اضافه کردن این ترکر به Stack پیش‌فرض گیت‌هاب
-        uv run zenml stack update default -e dagshub_mlflow_tracker
+        # ۳. 🌟 ساخت یک Stack جدید متشکل از ابزارهای دیفالت + ترکر ما
+        uv run zenml stack register ci_stack -a default -o default -e dagshub_mlflow_tracker
+        
+        # ۴. 🌟 فعال کردن Stack جدید تا کدها روی این اجرا شوند
+        uv run zenml stack set ci_stack
 
     - name: 🚀 Run Integration / Smoke Test
       run: |
