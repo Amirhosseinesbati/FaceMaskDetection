@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: src/docker/Dockerfile.api
+    image: ${DOCKER_USERNAME}/mask-detection-api:latest
+    container_name: mask-api
+    ports:
+      - "8000:8000"
+    environment:
+      - MODEL_NAME=face-mask-detector
+      - MODEL_STAGE=Production
+      - DAGSHUB_USERNAME=${DAGSHUB_USERNAME}
+      - DAGSHUB_REPO_NAME=${DAGSHUB_REPO_NAME}
+      - DAGSHUB_TOKEN=${DAGSHUB_TOKEN}
+    restart: unless-stopped
+
+  streamlit:
+    build:
+      context: .
+      dockerfile: src/docker/Dockerfile.streamlit
+    image: ${DOCKER_USERNAME}/mask-detection-ui:latest
+    container_name: mask-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - API_URL=http://api:8000
+    depends_on:
+      - api
+    restart: unless-stopped
