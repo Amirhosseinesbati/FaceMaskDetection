@@ -1,20 +1,20 @@
-#!/bin/bash
+
 
 cleanup() {
     echo "========================================="
     echo "🚨 Pipeline finished or crashed!"
     echo "Destroying vast.ai instance $INSTANCE_ID to save money..."
     echo "========================================="
-    pip install vastai --break-system-packages
+    pip install vastai
     vastai set api-key $VAST_API_KEY
-    # اضافه کردن yes برای رد کردن سوال "آیا مطمئن هستید؟"
+    
     yes | vastai destroy instance $INSTANCE_ID
 }
 
 trap cleanup EXIT
 
 echo "🚀 Starting Environment Setup..."
-# نصب uv و اصلاح مسیر لینوکس (حل ارور اول)
+
 curl -LsSf https://astral.sh/uv/install.sh | sh
 export PATH="$HOME/.local/bin:$PATH"
 
@@ -28,7 +28,7 @@ echo "📦 Installing dependencies with uv..."
 uv sync
 
 
-# کانفیگ کگل برای دانلود دیتاست
+
 mkdir -p ~/.kaggle
 echo "{\"username\":\"$KAGGLE_USERNAME\",\"key\":\"$KAGGLE_KEY\"}" > ~/.kaggle/kaggle.json
 chmod 600 ~/.kaggle/kaggle.json
