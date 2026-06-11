@@ -333,3 +333,12 @@ This project is licensed under the [Apache License 2.0](LICENSE).
 
 - Dataset: [Face Mask Detection on Kaggle](https://www.kaggle.com/datasets/andrewmvd/face-mask-detection) by Andrew Mvd
 - Built with PyTorch, ZenML, MLflow, FastAPI, and Streamlit
+
+
+
+## Author
+
+**Amirhossein Esbati**
+
+- GitHub: [@Amirhosseinesbati](https://github.com/Amirhosseinesbati)
+
